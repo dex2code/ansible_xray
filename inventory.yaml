@@ -1,0 +1,12 @@
+all:
+
+  hosts:
+
+    xray-host:
+      ansible_host: localhost
+#      os_host: "macos"
+      os_host: "linux"
+#      arch_host: "32"
+#      arch_host: "64"
+#      arch_host: "arm32-v7a"
+      arch_host: "arm64-v8a"

@@ -1,0 +1,84 @@
+{
+    "log": {
+        "loglevel": "warning",
+        "access": "access.log",
+        "error": "error.log",
+        "dnslog": true
+    },
+
+    "dns": {
+        "servers": [
+            "1.1.1.1",
+            "8.8.8.8"
+        ]
+    },
+
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": []
+    },
+
+    "inbounds": [
+
+        {
+            "tag": "shadowsocks",
+            "listen": "0.0.0.0",
+            "protocol": "shadowsocks",
+            "port": {{ shadowsocks_port }},
+            "settings": {
+                "method": "{{ shadowsocks_method }}",
+                "password": "{{ shadowsocks_password }}",
+                "network": "tcp,udp"
+            }
+        },
+
+        {
+            "tag": "VLESS-XTLS-uTLS-REALITY",
+            "listen": "0.0.0.0",
+            "protocol": "vless",
+            "port": {{ vless_port }},
+            "settings": {
+                "decryption": "none",
+                "clients": [
+                    {
+                        "id": "{{ vless_client_id }}",
+                        "flow": "xtls-rprx-vision"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "raw",
+                "security": "reality",
+                "realitySettings": {
+                    "target": "{{ vless_sni }}:443",
+                    "show": false,
+                    "minClientVer": "",
+                    "maxClientVer": "",
+                    "xver": 0,
+                    "serverNames": [ "{{ vless_sni }}" ],
+                    "privateKey": "{{ vless_private_key}}",
+                    "maxTimeDiff": 0,
+                    "shortIds": [ "{{ vless_short_id }}" ],
+                    "limitFallbackUpload": {
+                        "afterBytes": 0,
+                        "bytesPerSec": 0,
+                        "burstBytesPerSec": 0
+                    },
+                    "limitFallbackDownload": {
+                        "afterBytes": 0,
+                        "bytesPerSec": 0,
+                        "burstBytesPerSec": 0
+                    }
+                }
+            }
+        }
+    ],
+
+    "outbounds": [
+        {
+            "tag": "freedom",
+            "protocol": "freedom"
+        }
+    ]
+
+}
