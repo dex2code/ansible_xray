@@ -14,7 +14,36 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 - **Automated Deployment**: Installs all necessary dependencies and XRAY binaries
 - **Dual Configuration**: Configures both Shadowsocks and VLESS Reality protocols
 - **Service Management**: Sets up automatic startup on system boot
-- **Security Hardening**: Applies security best practices and firewall rules
-- **Monitoring Integration**: Optional monitoring and logging configuration
-- **Easy Maintenance**: Simple update and maintenance procedures
+- **Easy Maintenance**: Simple install and update procedures
 
+## Prerequisites
+
+- Control machine with Python 3.12 
+- Target servers with:
+  - Modern Ubuntu or Debian OS installed
+  - SSH access with sudo privileges
+  - Minimum 1GB RAM, 10GB disk space
+
+## Install
+
+1. Clone Git Repository:
+`git clone https://github.com/dex2code/ansible_xray.git && cd ansible_xray`
+
+2. Install Python VENV:
+`python3 -m venv .venv`
+
+3. Activate Python VENV:
+`source .venv/bin/activate`
+
+4. Install requirements:
+`pip install -r requirements.txt`
+
+5. Edit inventory.yaml to set up correct settings
+
+6. Run installation playbook:
+`ansible-playbook -i inventory.yaml install.yaml`
+
+7. Import configurations into your mobile app using the QR codes in PNG directory
+
+8. Deactivate Python VENV:
+`deactivate`
