@@ -38,12 +38,50 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 4. Install requirements:
 `pip install -r requirements.txt`
 
-5. Edit inventory.yaml to set up correct settings
+5. Edit `inventory.yaml` to set up correct settings
 
 6. Run installation playbook:
 `ansible-playbook -i inventory.yaml install.yaml`
 
-7. Import configurations into your mobile app using the QR codes in PNG directory
+7. Import configurations into your mobile app using the QR codes in created PNG directory
 
 8. Deactivate Python VENV:
 `deactivate`
+
+## Update xray binaries to current version:
+
+`ansible-playbook -i inventory.yaml update.yaml`
+
+## Service management
+
+After deployment, manage the service on remote host with:
+
+Check service status: `sudo systemctl status xray`
+
+View logs: `sudo journalctl -u xray -f`
+
+Restart service: `sudo systemctl restart xray`
+
+Stop service: `sudo systemctl stop xray`
+
+Disable autostart: `sudo systemctl disable xray`
+
+## Monitoring and Logs
+
+Binary Location: `~/opt/xray`
+
+Log Location: `~/opt/xray/access.log` and `~/opt/xray/error.log`
+
+Configuration: `~/opt/xray/config.json`
+
+## Troubleshooting
+
+Common issues and solutions:
+
+    Port Conflicts: Check if ports from `inventory.yaml` are in use
+
+    Permission Issues: Ensure proper user/group permissions
+
+    Firewall Blocking: Verify firewall rules allow traffic
+
+    Service Not Starting: Check logs with journalctl -u xray
