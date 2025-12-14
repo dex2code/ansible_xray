@@ -30,18 +30,18 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 `git clone https://github.com/dex2code/ansible_xray.git && cd ansible_xray`
 
 2. Install Python VENV:
-`python3 -m venv .venv`
+`python3 -m venv ./.venv`
 
 3. Activate Python VENV:
-`source .venv/bin/activate`
+`source ./.venv/bin/activate`
 
 4. Install requirements:
-`pip install -r requirements.txt`
+`pip install -r ./requirements.txt`
 
-5. Edit `inventory.yaml` to set up correct settings
+5. Edit `nano ./inventory.yaml` to set up correct settings
 
 6. Run installation playbook:
-`ansible-playbook -i inventory.yaml install.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./install.yaml`
 
 7. Import configurations into your mobile app using the QR codes in created PNG directory
 
@@ -50,7 +50,7 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 
 ## Update xray binaries to current version:
 
-`ansible-playbook -i inventory.yaml update.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./update.yaml`
 
 ## Service management
 
