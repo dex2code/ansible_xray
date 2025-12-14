@@ -1,0 +1,37 @@
+- name: "Update XRay-core binaries with the same configuration"
+  hosts: all
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: root
+
+  tasks:
+
+    - name: "Deploy XRay-core binaries"
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-{{ xray_arch_host }}.zip"
+        dest: "/home/{{ xray_user }}/opt/xray"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_user }}"
+
+    - name: "Set binary +x"
+      ansible.builtin.file:
+        path: "/home/{{ xray_user }}/opt/xray/xray"
+        mode: "0755"
+
+    - name: Enable and restart service
+      ansible.builtin.systemd:
+        name: "xray.service"
+        state: "restarted"
+
+    - name: Fetch ShadowSocks QR
+      ansible.builtin.fetch:
+        src: "/home/{{ xray_user }}/opt/xray/shadowsocks.png"
+        dest: "PNG/{{ ansible_host }}_shadowsocks.png"
+        flat: true
+
+    - name: Fetch VLESS QR
+      ansible.builtin.fetch:
+        src: "/home/{{ xray_user }}/opt/xray/vless.png"
+        dest: "PNG/{{ ansible_host }}_vless.png"
+        flat: true

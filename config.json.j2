@@ -3,7 +3,7 @@
         "loglevel": "warning",
         "access": "access.log",
         "error": "error.log",
-        "dnslog": true
+        "dnslog": false
     },
 
     "dns": {
@@ -27,7 +27,7 @@
             "port": {{ shadowsocks_port }},
             "settings": {
                 "method": "{{ shadowsocks_method }}",
-                "password": "{{ shadowsocks_password }}",
+                "password": "{{ shadowsocks_secret.stdout }}",
                 "network": "tcp,udp"
             }
         },
@@ -41,7 +41,7 @@
                 "decryption": "none",
                 "clients": [
                     {
-                        "id": "{{ vless_client_id }}",
+                        "id": "{{ vless_client_id.stdout }}",
                         "flow": "xtls-rprx-vision"
                     }
                 ]
@@ -56,9 +56,9 @@
                     "maxClientVer": "",
                     "xver": 0,
                     "serverNames": [ "{{ vless_sni }}" ],
-                    "privateKey": "{{ vless_private_key}}",
+                    "privateKey": "{{ vless_secret_key }}",
                     "maxTimeDiff": 0,
-                    "shortIds": [ "{{ vless_short_id }}" ],
+                    "shortIds": [ "{{ vless_short_id.stdout }}" ],
                     "limitFallbackUpload": {
                         "afterBytes": 0,
                         "bytesPerSec": 0,
