@@ -38,10 +38,10 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 4. Install requirements:
 `pip install -r ./requirements.txt`
 
-5. Edit `nano ./inventory.yaml` to set up correct settings
+5. Edit `inventory.yaml` to set up correct settings
 
 6. Run installation playbook:
-`./.venv/bin/ansible-playbook -i ./inventory.yaml ./install.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_install.yaml`
 
 7. Import configurations into your mobile app using the QR codes in created PNG directory
 
@@ -50,7 +50,11 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 
 ## Update xray binaries to current version:
 
-`./.venv/bin/ansible-playbook -i ./inventory.yaml ./update.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_update.yaml`
+
+## Uninstall xray binaries and remove service:
+
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_uninstall.yaml`
 
 ## Service management
 
@@ -68,20 +72,20 @@ Disable autostart: `sudo systemctl disable xray`
 
 ## Monitoring and Logs
 
-Binary Location: `~/opt/xray`
+Binary Location: `/opt/xray`
 
-Log Location: `~/opt/xray/access.log` and `~/opt/xray/error.log`
+Log Location: `/opt/xray/access.log` and `/opt/xray/error.log`
 
-Configuration: `~/opt/xray/config.json`
+Configuration: `/opt/xray/config.json`
 
 ## Troubleshooting
 
 Common issues and solutions:
 
-    Port Conflicts: Check if ports from `inventory.yaml` are in use
+- Port Conflicts: Check if ports from `inventory.yaml` are in use
 
-    Permission Issues: Ensure proper user/group permissions
+- Permission Issues: Ensure proper user/group permissions
 
-    Firewall Blocking: Verify firewall rules allow traffic
+- Firewall Blocking: Verify firewall rules allow traffic
 
-    Service Not Starting: Check logs with journalctl -u xray
+- Service Not Starting: Check logs with journalctl -u xray

@@ -213,4 +213,5 @@ vless.png
 .vscode/
 .ansible/
 PNG/
+JSON/
 inventory_private.yaml
