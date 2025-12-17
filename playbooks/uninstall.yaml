@@ -6,6 +6,10 @@
 
   tasks:
 
+    - name: "Set XRAY vars"
+      ansible.builtin.set_fact:
+        xray_path: "{{ (xray_path is not defined or xray_path == '') | ternary('/opt/xray', xray_path) }}"
+
     - name: "Stop and disable service"
       ansible.builtin.systemd_service:
         name: "xray.service"
@@ -23,14 +27,14 @@
         daemon_reexec: true
         daemon_reload: true
 
-    - name: "Save config backup"
+    - name: "Fetch config backup"
       ansible.builtin.fetch:
-        src: "/opt/xray/config.json"
-        dest: "JSON/{{ ansible_host }}_config.json"
+        src: "{{ xray_path }}/config.json"
+        dest: "../.configs/config@{{ ansible_host }}.json"
         flat: true
       failed_when: false
 
     - name: "Remove service directory"
       ansible.builtin.file:
-        name: "/opt/xray"
+        name: "{{ xray_path }}"
         state: absent

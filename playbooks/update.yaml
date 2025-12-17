@@ -6,6 +6,12 @@
 
   tasks:
 
+    - name: "Set XRAY vars"
+      ansible.builtin.set_fact:
+        xray_path: "{{ (xray_path is not defined or xray_path == '') | ternary('/opt/xray', xray_path) }}"
+        xray_user: "{{ (xray_user is not defined or xray_user == '') | ternary('xray', xray_user) }}"
+        xray_arch: "{{ (xray_arch is not defined or xray_arch == '') | ternary('64', xray_arch) }}"
+
     - name: "Get group"
       ansible.builtin.command:
         cmd: "id -gn {{ xray_user }}"
@@ -15,14 +21,14 @@
     - name: "Deploy XRay-core binaries"
       ansible.builtin.unarchive:
         remote_src: true
-        src: "https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-{{ xray_arch_host }}.zip"
-        dest: "/opt/xray"
+        src: "https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-{{ xray_arch }}.zip"
+        dest: "{{ xray_path }}"
         owner: "{{ xray_user }}"
         group: "{{ xray_group.stdout }}"
 
     - name: "Set binary +x"
       ansible.builtin.file:
-        path: "/opt/xray/xray"
+        path: "{{ xray_path }}/xray"
         mode: "0755"
 
     - name: Enable and restart service

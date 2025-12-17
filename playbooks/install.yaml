@@ -1,0 +1,234 @@
+- name: "Deploy and configure XRay-core with ShadowSocks and VLESS-XTLS-uTLS-Reality service"
+  hosts: all
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: root
+
+
+  tasks:
+
+    - name: "Install neccessary packages"
+      ansible.builtin.apt:
+        pkg:
+          - "qrencode"
+        state: present
+        update_cache: true
+
+    - name: "Set XRAY vars"
+      ansible.builtin.set_fact:
+        xray_path: "{{ (xray_path is not defined or xray_path == '') | ternary('/opt/xray', xray_path) }}"
+        xray_user: "{{ (xray_user is not defined or xray_user == '') | ternary('xray', xray_user) }}"
+        xray_arch: "{{ (xray_arch is not defined or xray_arch == '') | ternary('64', xray_arch) }}"
+
+    - name: "Debug"
+      ansible.builtin.debug:
+        msg: |
+          "xray_path: {{ xray_path }}"
+          "xray_user: {{ xray_user }}"
+          "xray_arch: {{ xray_arch }}"
+
+    - name: "Check if user exists"
+      ansible.builtin.command:
+        cmd: "id {{ xray_user }}"
+      register: xray_user_exists
+      changed_when: false
+      failed_when: false
+      ignore_errors: true
+
+    - name: "Create user"
+      ansible.builtin.user:
+        name: "{{ xray_user }}"
+        home: "/home/{{ xray_user }}"
+        shell: "/bin/false"
+        password: "!"
+      when: (xray_user_exists.rc is defined and xray_user_exists.rc != 0)
+
+    - name: "Get group"
+      ansible.builtin.command:
+        cmd: "id -gn {{ xray_user }}"
+      register: xray_group
+      changed_when: false
+
+    - name: "Create service directory"
+      ansible.builtin.file:
+        path: "{{ xray_path }}"
+        state: directory
+        mode: "0750"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_group.stdout }}"
+
+    - name: "Deploy XRay-core binaries"
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-{{ xray_arch }}.zip"
+        dest: "{{ xray_path }}"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_group.stdout }}"
+      changed_when: false
+
+    - name: "Set binary +x"
+      ansible.builtin.file:
+        path: "{{ xray_path }}/xray"
+        mode: "0755"
+
+    - name: "Set ShadowSocks vars"
+      ansible.builtin.set_fact:
+        shadowsocks_port: "{{ (shadowsocks_port is not defined or shadowsocks_port == '') | ternary('8080', shadowsocks_port) }}"
+        shadowsocks_method: "{{ (shadowsocks_method is not defined or shadowsocks_method == '') | ternary('aes-128-gcm', shadowsocks_method) }}"
+
+    - name: "Set ShadowSocks secret"
+      ansible.builtin.set_fact:
+        shadowsocks_secret: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=12') }}"
+      when: (shadowsocks_secret is not defined or shadowsocks_secret == '')
+
+    - name: "Debug"
+      ansible.builtin.debug:
+        msg: |
+          "shadowsocks_port: {{ shadowsocks_port }}"
+          "shadowsocks_method: {{ shadowsocks_method }}"
+          "shadowsocks_secret: {{ shadowsocks_secret }}"
+
+    - name: "Set VLESS vars"
+      ansible.builtin.set_fact:
+        vless_port: "{{ (vless_port is not defined or vless_port == '') | ternary('8443', vless_port) }}"
+        vless_sni: "{{ (vless_sni is not defined or vless_sni == '') | ternary('www.google.com', vless_sni) }}"
+
+    - name: "Set VLESS client_id"
+      ansible.builtin.set_fact:
+        vless_client_id: "{{ lookup('pipe', 'uuidgen') | lower }}"
+      when: (vless_client_id is not defined or vless_client_id == '')
+
+    - name: "Set VLESS short_id"
+      ansible.builtin.set_fact:
+        vless_short_id: "{{ lookup('password', '/dev/null chars=abcdef0123456789 length=12') }}"
+      when: (vless_short_id is not defined or vless_short_id == '')
+
+    - name: Generate X25519 pair
+      ansible.builtin.command:
+        cmd: "{{ xray_path }}/xray x25519"
+      changed_when: false
+      when: (vless_secret_key is not defined or vless_secret_key == '' or vless_public_key is not defined or vless_public_key == '')
+      register: "x25519"
+
+    - name: Set X25519 pair
+      ansible.builtin.set_fact:
+        vless_secret_key: "{{ x25519.stdout.split('\n')[0].split(': ')[1] }}"
+        vless_public_key: "{{ x25519.stdout.split('\n')[1].split(': ')[1] }}"
+      when: (x25519.stdout is defined and x25519.stdout != '')
+
+    - name: "Debug"
+      ansible.builtin.debug:
+        msg: |
+          "vless_port: {{ vless_port }}"
+          "vless_sni: {{ vless_sni }}"
+          "vless_client_id: {{ vless_client_id }}"
+          "vless_short_id: {{ vless_client_id }}"
+          "vless_secret_key: {{ vless_secret_key }}"
+          "vless_public_key: {{ vless_public_key }}"
+
+    - name: "Deploy XRay configuration"
+      ansible.builtin.template:
+        src: "templates/config.json.j2"
+        dest: "{{ xray_path }}/config.json"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_group.stdout }}"
+        mode: "0640"
+
+    - name: Deploy systemd unit
+      ansible.builtin.template:
+        src: "templates/xray.service.j2"
+        dest: "/etc/systemd/system/xray.service"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
+    - name: Enable and restart service
+      ansible.builtin.systemd_service:
+        daemon_reexec: true
+        daemon_reload: true
+        name: "xray.service"
+        state: "restarted"
+        enabled: true
+
+    - name: Compose ShadowSocks link
+      ansible.builtin.set_fact:
+        shadowsocks_link: >-
+          {{
+            'ss://' ~ shadowsocks_method ~ ':' ~ shadowsocks_secret ~ '@' ~ ansible_host ~ ':' ~ shadowsocks_port ~
+            '#ss@' ~ ansible_host
+          }}
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg: "ShadowSocks Link: {{ shadowsocks_link }}"
+
+    - name: Compose ShadowSocks link Base64
+      ansible.builtin.set_fact:
+        shadowsocks_link_b64: "{{ shadowsocks_link | b64encode }}"
+
+    - name: Generate ShadowSocks QR
+      ansible.builtin.command:
+        cmd: "qrencode -t PNG -o {{ xray_path }}/shadowsocks.png \"{{ shadowsocks_link_b64 }}\""
+      changed_when: false
+
+    - name: Set owner shadowsocks.png
+      ansible.builtin.file:
+        path: "{{ xray_path }}/shadowsocks.png"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_group.stdout }}"
+        mode: "0640"
+
+    - name: Fetch ShadowSocks QR
+      ansible.builtin.fetch:
+        src: "{{ xray_path }}/shadowsocks.png"
+        dest: "../.qr/ss@{{ ansible_host }}.png"
+        flat: true
+
+    - name: Compose VLESS link
+      ansible.builtin.set_fact:
+        vless_link: >-
+          {{
+            'vless://' ~ vless_client_id ~ '@' ~ ansible_host ~ ':' ~ vless_port ~
+            '?security=reality' ~
+            '&encryption=none' ~
+            '&pbk=' ~ vless_public_key ~
+            '&headerType=none' ~
+            '&fp=chrome' ~
+            '&type=tcp' ~
+            '&flow=xtls-rprx-vision' ~
+            '&sni=' ~ vless_sni ~
+            '&sid=' ~ vless_short_id ~
+            '#reality@' ~ ansible_host
+          }}
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg: "VLESS Link: {{ vless_link }}"
+
+    - name: Compose VLESS link Base64
+      ansible.builtin.set_fact:
+        vless_link_b64: "{{ vless_link | b64encode }}"
+
+    - name: Generate VLESS QR
+      ansible.builtin.command:
+        cmd: "qrencode -t PNG -o {{ xray_path }}/vless.png \"{{ vless_link_b64 }}\""
+      changed_when: false
+
+    - name: Set owner vless.png
+      ansible.builtin.file:
+        path: "{{ xray_path }}/vless.png"
+        owner: "{{ xray_user }}"
+        group: "{{ xray_group.stdout }}"
+        mode: "0640"
+
+    - name: Fetch VLESS QR
+      ansible.builtin.fetch:
+        src: "{{ xray_path }}/vless.png"
+        dest: "../.qr/vless@{{ ansible_host }}.png"
+        flat: true
+
+    - name: "Fetch config backup"
+      ansible.builtin.fetch:
+        src: "{{ xray_path }}/config.json"
+        dest: "../.configs/config@{{ ansible_host }}.json"
+        flat: true

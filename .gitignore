@@ -212,6 +212,7 @@ shadowsocks.png
 vless.png
 .vscode/
 .ansible/
-PNG/
-JSON/
+.qr/
+.configs/
 inventory_private.yaml
+test.yaml

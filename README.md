@@ -41,20 +41,20 @@ This Ansible playbook provides **automated deployment**, **configuration**, and 
 5. Edit `inventory.yaml` to set up correct settings
 
 6. Run installation playbook:
-`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_install.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbooks/install.yaml`
 
-7. Import configurations into your mobile app using the QR codes in created PNG directory
-
-8. Deactivate Python VENV:
+7. Deactivate Python VENV:
 `deactivate`
+
+8. Find fetched QR codes for both shadowsocks and VLESS profiles in `.qr/` and `config.json` in `.configs/` folder
 
 ## Update xray binaries to current version:
 
-`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_update.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbooks/update.yaml`
 
 ## Uninstall xray binaries and remove service:
 
-`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbook_uninstall.yaml`
+`./.venv/bin/ansible-playbook -i ./inventory.yaml ./playbooks/uninstall.yaml`
 
 ## Service management
 
@@ -72,11 +72,11 @@ Disable autostart: `sudo systemctl disable xray`
 
 ## Monitoring and Logs
 
-Binary Location: `/opt/xray`
+Binary Location: `/opt/xray` by default as {{ xray_path }}
 
-Log Location: `/opt/xray/access.log` and `/opt/xray/error.log`
+Log Location: `{{ xray_path }}/access.log` and `{{ xray_path }}/error.log`
 
-Configuration: `/opt/xray/config.json`
+Configuration: `{{ xray_path }}/config.json`
 
 ## Troubleshooting
 

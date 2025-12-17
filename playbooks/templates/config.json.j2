@@ -27,7 +27,7 @@
             "port": {{ shadowsocks_port }},
             "settings": {
                 "method": "{{ shadowsocks_method }}",
-                "password": "{{ shadowsocks_secret.stdout }}",
+                "password": "{{ shadowsocks_secret }}",
                 "network": "tcp,udp"
             }
         },
@@ -41,7 +41,7 @@
                 "decryption": "none",
                 "clients": [
                     {
-                        "id": "{{ vless_client_id.stdout }}",
+                        "id": "{{ vless_client_id }}",
                         "flow": "xtls-rprx-vision"
                     }
                 ]
@@ -59,7 +59,7 @@
                     "privateKey": "{{ vless_secret_key }}",
                     "publicKey": "{{ vless_public_key }}",
                     "maxTimeDiff": 0,
-                    "shortIds": [ "{{ vless_short_id.stdout }}" ],
+                    "shortIds": [ "{{ vless_short_id }}" ],
                     "limitFallbackUpload": {
                         "afterBytes": 0,
                         "bytesPerSec": 0,

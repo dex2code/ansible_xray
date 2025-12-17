@@ -2,28 +2,27 @@ all:
 
   hosts:
 
-    xray-host:
+    xray-host_01:
       ansible_connection: "ssh"
-      ansible_host: "127.0.0.1" # <-- You have to set correct host here
-      ansible_port: "22" # <-- You have to set correct port here
+      ansible_host: "127.0.0.1" # !!! You have to set correct target host here.
+      ansible_port: "22"        # !!! You have to set correct target port here.
 
-      ansible_user: "" # <-- You have to set correct user here
-      ansible_become_pass: "" # <-- You have to set correct sudo password for your ansible_user here
+      ansible_user: ""          # !!! You have to set correct user here to connect target host via SSH.
+      ansible_become_pass: ""   # !!! You have to set correct sudo password for your ansible_user here.
       ansible_password: "{{ ansible_become_pass }}"
       ansible_python_interpreter: "/usr/bin/python3"
 
-# You have to uncomment correct arch value for your host below
-# for correct download link: https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-{{ xray_arch_host }}.zip
-#      xray_arch_host: "32"
-#      xray_arch_host: "64"
-#      xray_arch_host: "arm32-v7a"
-#      xray_arch_host: "arm64-v8a"
+      xray_path: ""             # Leave empty for "/opt/xray" or you can set your value here.
+      xray_user: ""             # Leave empty for "xray" or you can set another user. Set "root" to use TCP ports under 1024 (80 or 443).
+      xray_arch: ""             # Leave empty for "64" by default. Possible values: "32", "64", "arm32-v7a", "arm64-v8a".
 
-# You can change xray settings below
-      xray_user: "xray"
+      shadowsocks_port: ""      # Leave empty for "8080" or you can put your value.
+      shadowsocks_method: ""    # Leave empty for "aes-128-gcm" or you can put your favorite method.
+      shadowsocks_secret: ""    # Leave empty to generate random pass or you can set your own password.
 
-      shadowsocks_port: 8000
-      shadowsocks_method: "aes-128-gcm"
-
-      vless_port: 9000
-      vless_sni: "www.microsoft.com"
+      vless_port: ""            # Leave empty for "8443" or you can put your value.
+      vless_client_id: ""       # Leave empty to generate random UUID4 ID or you can put your value here.
+      vless_short_id: ""        # Leave empty to generate random short ID or you can put your value here.
+      vless_sni: ""             # Leave empty for "www.google.com" or you can put your SNI value.
+      vless_secret_key: ""      # Leave empty to generate random X25519 key or you can put your value here.
+      vless_public_key: ""      # Leave empty to generate random X25519 key or you can put your value here.
