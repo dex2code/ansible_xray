@@ -134,6 +134,12 @@
         group: "{{ xray_group.stdout }}"
         mode: "0640"
 
+    - name: "Fetch config backup"
+      ansible.builtin.fetch:
+        src: "{{ xray_path }}/config.json"
+        dest: "../.configs/config@{{ ansible_host }}.json"
+        flat: true
+
     - name: Deploy systemd unit
       ansible.builtin.template:
         src: "templates/xray.service.j2"
@@ -225,10 +231,4 @@
       ansible.builtin.fetch:
         src: "{{ xray_path }}/vless.png"
         dest: "../.qr/vless@{{ ansible_host }}.png"
-        flat: true
-
-    - name: "Fetch config backup"
-      ansible.builtin.fetch:
-        src: "{{ xray_path }}/config.json"
-        dest: "../.configs/config@{{ ansible_host }}.json"
         flat: true
