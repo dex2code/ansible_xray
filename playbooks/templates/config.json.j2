@@ -50,7 +50,7 @@
                 "network": "raw",
                 "security": "reality",
                 "realitySettings": {
-                    "target": "{{ vless_sni }}:443",
+                    "dest": "{{ vless_sni }}:443",
                     "show": false,
                     "minClientVer": "",
                     "maxClientVer": "",
@@ -59,18 +59,12 @@
                     "privateKey": "{{ vless_secret_key }}",
                     "publicKey": "{{ vless_public_key }}",
                     "maxTimeDiff": 0,
-                    "shortIds": [ "{{ vless_short_id }}" ],
-                    "limitFallbackUpload": {
-                        "afterBytes": 0,
-                        "bytesPerSec": 0,
-                        "burstBytesPerSec": 0
-                    },
-                    "limitFallbackDownload": {
-                        "afterBytes": 0,
-                        "bytesPerSec": 0,
-                        "burstBytesPerSec": 0
-                    }
+                    "shortIds": [ "{{ vless_short_id }}" ]
                 }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": ["http", "tls"]
             }
         }
     ],
