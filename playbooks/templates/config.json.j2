@@ -33,7 +33,7 @@
         },
 
         {
-            "tag": "VLESS-XTLS-uTLS-REALITY",
+            "tag": "vless",
             "listen": "0.0.0.0",
             "protocol": "vless",
             "port": {{ vless_port }},
@@ -42,29 +42,31 @@
                 "clients": [
                     {
                         "id": "{{ vless_client_id }}",
-                        "flow": "xtls-rprx-vision"
+                        "flow": ""
                     }
                 ]
             },
             "streamSettings": {
-                "network": "raw",
+                "network": "xhttp",
+                "xhttpSettings": {
+                    "mode": "stream-one",
+                    "host": "{{ vless_sni }}",
+                    "path": "/api/v1"
+                },
                 "security": "reality",
                 "realitySettings": {
                     "target": "{{ vless_sni }}:443",
                     "show": false,
-                    "minClientVer": "",
-                    "maxClientVer": "",
-                    "xver": 0,
                     "serverNames": [ "{{ vless_sni }}" ],
                     "privateKey": "{{ vless_secret_key }}",
                     "publicKey": "{{ vless_public_key }}",
-                    "maxTimeDiff": 0,
-                    "shortIds": [ "{{ vless_short_id }}" ]
+                    "shortIds": [ "{{ vless_short_id }}" ],
+                    "spiderX": "/redirect"
                 }
             },
             "sniffing": {
                 "enabled": true,
-                "destOverride": ["http", "tls"]
+                "destOverride": ["http", "tls", "quic"]
             }
         }
     ],
@@ -72,7 +74,15 @@
     "outbounds": [
         {
             "tag": "freedom",
-            "protocol": "freedom"
+            "protocol": "freedom",
+            "settings": {},
+            "streamSettings": {}
+        },
+        {
+            "tag": "block",
+            "protocol": "blackhole",
+            "settings": {},
+            "streamSettings": {}
         }
     ]
 

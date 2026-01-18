@@ -195,16 +195,18 @@
         vless_link: >-
           {{
             'vless://' ~ vless_client_id ~ '@' ~ ansible_host ~ ':' ~ vless_port ~
-            '?security=reality' ~
             '&encryption=none' ~
-            '&pbk=' ~ vless_public_key ~
-            '&headerType=none' ~
-            '&fp=chrome' ~
-            '&type=tcp' ~
-            '&flow=xtls-rprx-vision' ~
+            '?security=reality' ~
             '&sni=' ~ vless_sni ~
+            '&fp=chrome' ~
+            '&pbk=' ~ vless_public_key ~
             '&sid=' ~ vless_short_id ~
-            '#reality@' ~ ansible_host
+            '&spx=/redirect' ~
+            '&type=xhttp' ~
+            '&host=' ~ vless_sni ~
+            '&path=/api/v1' ~
+            '&mode=stream-one' ~
+            '#vless@' ~ ansible_host
           }}
 
     - name: Debug
