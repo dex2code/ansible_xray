@@ -14,14 +14,38 @@
     },
 
     "routing": {
-        "domainStrategy": "AsIs",
-        "rules": []
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "type": "field",
+                "outboundTag": "freedom",
+                "network": "tcp,udp"
+            }
+        ]
     },
 
     "inbounds": [
 
         {
-            "tag": "shadowsocks",
+            "tag": "in-socks",
+            "listen": "127.0.0.1",
+            "port": 1080,
+            "protocol": "socks",
+            "settings": {
+                "auth": "noauth",
+                "udp": true,
+                "ip": "127.0.0.1",
+                "userLevel": 0
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [ "http", "tls", "quic" ],
+                "routeOnly": true
+            }
+        },
+
+        {
+            "tag": "in-shadowsocks",
             "listen": "0.0.0.0",
             "protocol": "shadowsocks",
             "port": {{ shadowsocks_port }},
@@ -29,44 +53,45 @@
                 "method": "{{ shadowsocks_method }}",
                 "password": "{{ shadowsocks_secret }}",
                 "network": "tcp,udp"
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [ "http", "tls", "quic" ],
+                "routeOnly": true
             }
         },
 
         {
-            "tag": "vless",
+            "tag": "in-vless",
             "listen": "0.0.0.0",
             "protocol": "vless",
             "port": {{ vless_port }},
             "settings": {
                 "decryption": "none",
+                "flow": "xtls-rprx-vision",
                 "clients": [
                     {
                         "id": "{{ vless_client_id }}",
-                        "flow": ""
+                        "flow": "xtls-rprx-vision"
                     }
                 ]
             },
             "streamSettings": {
-                "network": "xhttp",
-                "xhttpSettings": {
-                    "mode": "stream-one",
-                    "host": "{{ vless_sni }}",
-                    "path": "/api/v1"
-                },
+                "network": "raw",
                 "security": "reality",
                 "realitySettings": {
-                    "target": "{{ vless_sni }}:443",
                     "show": false,
+                    "target": "{{ vless_sni }}:443",
                     "serverNames": [ "{{ vless_sni }}" ],
                     "privateKey": "{{ vless_secret_key }}",
-                    "publicKey": "{{ vless_public_key }}",
+                    "password": "{{ vless_public_key }}",
                     "shortIds": [ "{{ vless_short_id }}" ],
-                    "spiderX": "/redirect"
                 }
             },
             "sniffing": {
                 "enabled": true,
-                "destOverride": ["http", "tls", "quic"]
+                "destOverride": ["http", "tls", "quic"],
+                "routeOnly": true
             }
         }
     ],

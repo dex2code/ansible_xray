@@ -195,17 +195,16 @@
         vless_link: >-
           {{
             'vless://' ~ vless_client_id ~ '@' ~ ansible_host ~ ':' ~ vless_port ~
-            '&encryption=none' ~
             '?security=reality' ~
+            '&encryption=none' ~
+            '&flow=xtls-rprx-vision' ~
+            '&headerType=none' ~
             '&sni=' ~ vless_sni ~
             '&fp=chrome' ~
             '&pbk=' ~ vless_public_key ~
             '&sid=' ~ vless_short_id ~
             '&spx=/redirect' ~
-            '&type=xhttp' ~
-            '&host=' ~ vless_sni ~
-            '&path=/api/v1' ~
-            '&mode=stream-one' ~
+            '&type=tcp' ~
             '#vless@' ~ ansible_host
           }}
 
